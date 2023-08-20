@@ -10,7 +10,7 @@ namespace MC_SVPlayerWarpIn
     public class Main : BaseUnityPlugin
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
-        public const string pluginName = "SV Player Warp";
+        public const string pluginName = "SV Player Warpin";
         public const string pluginVersion = "1.0.0";
 
         private static bool doWarp = false;
