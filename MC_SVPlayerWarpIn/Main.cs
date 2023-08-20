@@ -14,6 +14,9 @@ namespace MC_SVPlayerWarpIn
         public const string pluginVersion = "1.0.0";
 
         private static bool doWarp = false;
+        private static bool jumpGateWarp = false;
+
+        private static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
         public void Awake()
         {
@@ -31,6 +34,36 @@ namespace MC_SVPlayerWarpIn
 
             if (doWarp)
             {
+                if (jumpGateWarp)
+                {
+                    TSector sector = GameData.data.sectors[GameData.data.currentSectorIndex];
+                    GameObject closestJumpgate = null;
+                    float dist = 0;
+                    foreach (JumpGate jumpGate in sector.jumpGates)
+                    {
+                        if (closestJumpgate == null)
+                        {
+                            closestJumpgate = jumpGate.jumpGateControl.gameObject;
+                            dist = Vector3.Distance(GameManager.instance.Player.transform.position,
+                                jumpGate.jumpGateControl.gameObject.transform.position);
+                        }
+                        else
+                        {
+                            closestJumpgate = Vector3.Distance(GameManager.instance.Player.transform.position,
+                                jumpGate.jumpGateControl.gameObject.transform.position) < dist ? jumpGate.jumpGateControl.gameObject : closestJumpgate;
+                        }
+                    }
+
+                    if (closestJumpgate != null)
+                    {
+                        GameManager.instance.Player.transform.SetPositionAndRotation(
+                            closestJumpgate.transform.position,
+                            closestJumpgate.transform.rotation);
+                        GameManager.instance.Player.transform.position += GameManager.instance.Player.transform.forward * 100f;
+                    }
+                    jumpGateWarp = false;
+                }
+
                 WarpIn warpInComp = GameManager.instance.Player.AddComponent<WarpIn>();
                 warpInComp.warpInTime = 0;
             }
@@ -43,6 +76,13 @@ namespace MC_SVPlayerWarpIn
         private static void MenuControlLoadGame_Post()
         {
             doWarp = false;
+        }
+
+        [HarmonyPatch(typeof(JumpGateControl), "OnTriggerEnter")]
+        [HarmonyPostfix]
+        private static void JumpGateControlOnTriggerEnter_Post()
+        {
+            jumpGateWarp = true;
         }
     }
 }
