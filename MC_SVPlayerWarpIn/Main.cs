@@ -59,7 +59,7 @@ namespace MC_SVPlayerWarpIn
                         GameManager.instance.Player.transform.SetPositionAndRotation(
                             closestJumpgate.transform.position,
                             closestJumpgate.transform.rotation);
-                        GameManager.instance.Player.transform.position += GameManager.instance.Player.transform.forward * 100f;
+                        GameManager.instance.Player.transform.Translate(GameManager.instance.Player.transform.forward * 100f);
                     }
                     jumpGateWarp = false;
                 }
