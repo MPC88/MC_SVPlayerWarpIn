@@ -11,7 +11,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "1.0.1";
+        public const string pluginVersion = "1.0.2";
 
         private static bool doWarp = false;
         private static bool jumpGateWarp = false;
@@ -80,9 +80,10 @@ namespace MC_SVPlayerWarpIn
 
         [HarmonyPatch(typeof(JumpGateControl), "OnTriggerEnter")]
         [HarmonyPostfix]
-        private static void JumpGateControlOnTriggerEnter_Post()
+        private static void JumpGateControlOnTriggerEnter_Post(bool ___gateEnabled)
         {
-            jumpGateWarp = true;
+            if(___gateEnabled)
+                jumpGateWarp = true;
         }
     }
 }
