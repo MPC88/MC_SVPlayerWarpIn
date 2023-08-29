@@ -12,7 +12,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "1.0.2";
+        public const string pluginVersion = "2.0.0";
 
         private static bool doWarp = false;
         private static bool jumpGateWarp = false;
