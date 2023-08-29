@@ -53,6 +53,8 @@
 			}
 			GameObject.Instantiate<GameObject>(ObjManager.GetObj("Effects/WarpEffect"), base.transform.position, base.transform.rotation).GetComponent<AudioSource>().volume = 0;
 			GameObject.Destroy(this);
+			if(!isPlayer)
+				GameObject.Destroy(base.gameObject);
 		}
 	}
 
