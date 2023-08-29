@@ -6,7 +6,7 @@ Uninstall any mods and attempt to replicate issues before reporting any suspecte
   
 Function  
 ========  
-Adds warp-in effect to player warps.  
+Adds warp effect to player warps.  
   
 WARNING: If you play will collisions enabled, you probably don't want this.  A warp will hapilly send you careering into a passing civillian.   
   
