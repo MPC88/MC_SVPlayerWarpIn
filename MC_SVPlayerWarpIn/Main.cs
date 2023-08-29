@@ -3,7 +3,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace MC_SVPlayerWarpIn
 {
@@ -12,7 +11,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "2.0.1";
+        public const string pluginVersion = "2.0.2";
 
         private static bool doWarp = false;
         private static bool jumpGateWarp = false;
@@ -23,6 +22,13 @@ namespace MC_SVPlayerWarpIn
         public void Awake()
         {
             Harmony.CreateAndPatchAll(typeof(Main));
+        }
+
+        [HarmonyPatch(typeof(GameManager), "SpawnPlayerFleet")]
+        [HarmonyPrefix]
+        private static void GameManagerSpawnPlayerFleet_Pre(ref bool warpIn)
+        {
+            warpIn = doWarp;
         }
 
         [HarmonyPatch(typeof(PlayerControl), "ShowWarpEffect")]
