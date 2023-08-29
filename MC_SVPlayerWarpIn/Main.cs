@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,12 +16,36 @@ namespace MC_SVPlayerWarpIn
 
         private static bool doWarp = false;
         private static bool jumpGateWarp = false;
+        private static int jumpGateIndex = 0;
 
         private static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
         public void Awake()
         {
             Harmony.CreateAndPatchAll(typeof(Main));
+        }
+
+        [HarmonyPatch(typeof(PlayerControl), "ShowWarpEffect")]
+        [HarmonyPrefix]
+        private static bool PlayerControlShowWarpEffect_Pre(Transform ___tf)
+        {
+            WarpOut wo = ___tf.gameObject.AddComponent<WarpOut>();
+            wo.isPlayer = true;
+            return false;
+        }
+
+        [HarmonyPatch(typeof(AIControl), "WarpDisappear", new Type[] {typeof(bool) })]
+        [HarmonyPrefix]
+        private static bool AIControlWarpDisappear_Pre(bool nearPlayer, Transform ___tf)
+        {
+            if (nearPlayer)
+            {
+                WarpOut wo = ___tf.gameObject.AddComponent<WarpOut>();
+                wo.isPlayer = false;
+            }
+            GameObject.Destroy(___tf.gameObject);
+
+            return false;
         }
 
         [HarmonyPatch(typeof(GameManager), nameof(GameManager.SetupGame))]
@@ -37,31 +62,14 @@ namespace MC_SVPlayerWarpIn
                 if (jumpGateWarp)
                 {
                     TSector sector = GameData.data.sectors[GameData.data.currentSectorIndex];
-                    GameObject closestJumpgate = null;
-                    float dist = 0;
-                    foreach (JumpGate jumpGate in sector.jumpGates)
-                    {
-                        if (closestJumpgate == null)
-                        {
-                            closestJumpgate = jumpGate.jumpGateControl.gameObject;
-                            dist = Vector3.Distance(GameManager.instance.Player.transform.position,
-                                jumpGate.jumpGateControl.gameObject.transform.position);
-                        }
-                        else
-                        {
-                            closestJumpgate = Vector3.Distance(GameManager.instance.Player.transform.position,
-                                jumpGate.jumpGateControl.gameObject.transform.position) < dist ? jumpGate.jumpGateControl.gameObject : closestJumpgate;
-                        }
-                    }
-
-                    if (closestJumpgate != null)
+                    
+                    if (sector.jumpGates[jumpGateIndex] != null)
                     {
                         GameManager.instance.Player.transform.SetPositionAndRotation(
-                            closestJumpgate.transform.position,
-                            closestJumpgate.transform.rotation);
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.position,
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation);
                         GameManager.instance.Player.transform.Translate(GameManager.instance.Player.transform.forward * 100f);
-                    }
-                    jumpGateWarp = false;
+                    }                    
                 }
 
                 WarpIn warpInComp = GameManager.instance.Player.AddComponent<WarpIn>();
@@ -69,6 +77,8 @@ namespace MC_SVPlayerWarpIn
             }
             else
                 doWarp = true;
+
+            jumpGateWarp = false;
         }
 
         [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.LoadGame))]
@@ -76,14 +86,25 @@ namespace MC_SVPlayerWarpIn
         private static void MenuControlLoadGame_Post()
         {
             doWarp = false;
+            jumpGateWarp = false;
         }
 
-        [HarmonyPatch(typeof(JumpGateControl), "OnTriggerEnter")]
+        [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.WarpToSector))]
         [HarmonyPostfix]
-        private static void JumpGateControlOnTriggerEnter_Post(bool ___gateEnabled)
+        private static void PlayerControlWarpToSector_Post(TSector sector, bool usingJumpGate)
         {
-            if(___gateEnabled)
+            if(usingJumpGate)
+            {
                 jumpGateWarp = true;
+                for (int j = 0; j < sector.jumpGates.Count; j++)
+                {
+                    if (sector.jumpGates[j].connectedSector == GameData.data.currentSectorIndex)
+                    {
+                        jumpGateIndex = j;
+                        break;
+                    }
+                }
+            }
         }
     }
 }
