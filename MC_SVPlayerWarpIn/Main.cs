@@ -11,7 +11,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "2.0.2";
+        public const string pluginVersion = "2.0.3";
 
         private static bool doWarp = false;
         private static bool jumpGateWarp = false;
@@ -29,6 +29,30 @@ namespace MC_SVPlayerWarpIn
         private static void GameManagerSpawnPlayerFleet_Pre(ref bool warpIn)
         {
             warpIn = doWarp;
+        }
+
+        [HarmonyPatch(typeof(GameManager), "SpawnMercenary")]
+        [HarmonyPrefix]
+        private static void GameManagerSpawnMercenary_Pre(ref Quaternion rotation, Transform guardTarget, AICharacter aiChar)
+        {
+            if (guardTarget.CompareTag("Player"))
+            {
+                if (!jumpGateWarp)
+                {
+                    rotation = guardTarget.rotation;
+                    aiChar.rotationY = guardTarget.eulerAngles.y;
+                }
+                else
+                {
+                    TSector sector = GameData.data.sectors[GameData.data.currentSectorIndex];
+
+                    if (sector.jumpGates[jumpGateIndex] != null)
+                    {
+                        rotation = sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation;
+                        aiChar.rotationY = sector.jumpGates[jumpGateIndex].jumpGateControl.transform.eulerAngles.y;
+                    }
+                }
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControl), "ShowWarpEffect")]
