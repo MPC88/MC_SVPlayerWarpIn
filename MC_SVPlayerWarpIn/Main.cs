@@ -1,7 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using Rewired;
 using System;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace MC_SVPlayerWarpIn
@@ -13,8 +15,11 @@ namespace MC_SVPlayerWarpIn
         public const string pluginName = "SV Player Warpin";
         public const string pluginVersion = "2.0.3";
 
-        private static bool doWarp = false;
-        private static bool jumpGateWarp = false;
+        internal static BuffTowing buffTowing = null;
+        internal static bool isTowing = false;
+        internal static bool jumpGateWarp = false;
+
+        private static bool doWarp = false;        
         private static int jumpGateIndex = 0;
 
         private static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
@@ -59,6 +64,14 @@ namespace MC_SVPlayerWarpIn
         [HarmonyPrefix]
         private static bool PlayerControlShowWarpEffect_Pre(Transform ___tf)
         {
+            if (isTowing)
+            {
+                if (isTowing && !buffTowing)
+                    isTowing = false;
+
+                return true;
+            }
+            
             WarpOut wo = ___tf.gameObject.AddComponent<WarpOut>();
             wo.isPlayer = true;
             return false;
@@ -86,7 +99,7 @@ namespace MC_SVPlayerWarpIn
                 !GameManager.instance.inGame)
                 return;
 
-            if (doWarp)
+            if (doWarp && !isTowing)
             {
                 if (jumpGateWarp)
                 {
@@ -112,6 +125,9 @@ namespace MC_SVPlayerWarpIn
                 doWarp = true;
 
             jumpGateWarp = false;
+
+            if (isTowing && !buffTowing)
+                isTowing = false;
         }
 
         [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.LoadGame))]
@@ -138,6 +154,32 @@ namespace MC_SVPlayerWarpIn
                     }
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(BuffTowing), "Begin")]
+        [HarmonyPostfix]
+        private static void BuffTowingBegin_Post(BuffTowing __instance, BuffControl ___buffControl, Entity ___targetEntity)
+        {
+            if (___targetEntity == null || ___buffControl == null)
+                return;
+
+            DriftingObjectControl component = ___targetEntity.GetComponent<DriftingObjectControl>();
+            if (!___buffControl.owner.IsPlayer || component == null)
+                return;
+
+            buffTowing = __instance;
+            isTowing = true;
+        }
+
+        [HarmonyPatch(typeof(BuffTowing), "End")]
+        [HarmonyPostfix]
+        private static void BuffTowingEnd_Post(BuffControl ___buffControl)
+        {
+            if (!___buffControl.owner.IsPlayer)
+                return;
+
+            buffTowing = null;
+            isTowing = false;
         }
     }
 }

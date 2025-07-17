@@ -22,6 +22,7 @@
 			volume = SoundSys.SFXvolume;
 			if (!isPlayer)
 				volume /= 2;
+
 			base.Invoke("WarpStart", 0);
 		}
 
@@ -38,10 +39,8 @@
 			GameObject gameObject = GameObject.Instantiate<GameObject>(ObjManager.GetObj("Effects/WarpInEffect"), base.transform.position, base.transform.rotation);			
 			gameObject.transform.SetParent(base.transform, true);
 			gameObject.GetComponent<AudioSource>().volume = volume;
-			//float d = 1f + base.transform.localScale.x / 3f;
-			//gameObject.transform.localScale = new Vector3(1f, 1f, 1f) * d;
 			gameObject.transform.localScale = Vector3.one * (base.transform.localScale.x * 0.05f);
-		}
+        }
 
 		// Token: 0x06000A05 RID: 2565 RVA: 0x0006B208 File Offset: 0x00069408
 		private void WarpFinish()
@@ -57,7 +56,7 @@
 			GameObject.Destroy(this);
 			if(!isPlayer)
 				GameObject.Destroy(base.gameObject);
-		}
+        }
 	}
 
 }
