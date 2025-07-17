@@ -96,7 +96,11 @@ namespace MC_SVPlayerWarpIn
                     {
                         GameManager.instance.Player.transform.SetPositionAndRotation(
                             sector.jumpGates[jumpGateIndex].jumpGateControl.transform.position,
-                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation);
+                            new Quaternion(sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.x,
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.y,
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.z,
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.w));
+                        GameManager.instance.Player.transform.Rotate(new Vector3(0, 90, 0));
                         GameManager.instance.Player.transform.Translate(GameManager.instance.Player.transform.forward * 100f);
                     }                    
                 }
