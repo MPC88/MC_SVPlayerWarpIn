@@ -107,8 +107,12 @@ namespace MC_SVPlayerWarpIn
                     
                     if (sector.jumpGates[jumpGateIndex] != null)
                     {
+                        int playerShipClass = (int)PlayerControl.inst.GetSpaceShip.stats.modelData.shipClass;
+                        float offset = 10 * (playerShipClass + 1.5f);
+
                         GameManager.instance.Player.transform.SetPositionAndRotation(
-                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.position,
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.position +
+                            sector.jumpGates[jumpGateIndex].jumpGateControl.transform.right * offset,
                             new Quaternion(sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.x,
                             sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.y,
                             sector.jumpGates[jumpGateIndex].jumpGateControl.transform.rotation.z,
