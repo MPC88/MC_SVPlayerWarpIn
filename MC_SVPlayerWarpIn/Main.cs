@@ -13,7 +13,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "2.0.3";
+        public const string pluginVersion = "2.0.4";
 
         internal static BuffTowing buffTowing = null;
         internal static bool isTowing = false;
