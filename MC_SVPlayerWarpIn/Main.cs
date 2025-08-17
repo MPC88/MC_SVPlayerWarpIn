@@ -13,7 +13,7 @@ namespace MC_SVPlayerWarpIn
     {
         public const string pluginGuid = "mc.starvalor.playerwarpin";
         public const string pluginName = "SV Player Warpin";
-        public const string pluginVersion = "2.0.4";
+        public const string pluginVersion = "2.0.5";
 
         internal static BuffTowing buffTowing = null;
         internal static bool isTowing = false;
@@ -77,7 +77,7 @@ namespace MC_SVPlayerWarpIn
             return false;
         }
 
-        [HarmonyPatch(typeof(AIControl), "WarpDisappear", new Type[] {typeof(bool) })]
+        [HarmonyPatch(typeof(AIControl), "WarpDisappear", new Type[] { typeof(bool) })]
         [HarmonyPrefix]
         private static bool AIControlWarpDisappear_Pre(bool nearPlayer, Transform ___tf)
         {
@@ -85,7 +85,8 @@ namespace MC_SVPlayerWarpIn
             {
                 WarpOut wo = ___tf.gameObject.AddComponent<WarpOut>();
                 wo.isPlayer = false;
-            }            
+            }
+            UnityEngine.Object.Destroy(___tf.gameObject);
 
             return false;
         }
